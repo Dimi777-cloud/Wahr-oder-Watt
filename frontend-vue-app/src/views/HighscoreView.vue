@@ -1,17 +1,44 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { UserCircleIcon } from '@heroicons/vue/24/solid';
 
 const emit = defineEmits(['show-lobby']);
 
-// Mock data for the high scores
-const loggedInUser = ref({ name: 'Spieler 1' });
-const highscores = ref([
-  { name: 'Spieler 1', score: 1000 },
-  { name: 'Spieler 2', score: 900 },
-  { name: 'Spieler 3', score: 800 },
-  { name: 'Spieler 4', score: 700 },
-]);
+
+const loggedInUser = ref({ id: null, name: '' });
+const highscores = ref([]);
+const loading = ref(false);
+const loadError = ref(null);
+
+async function fetchHighscores(controller = new AbortController()) {
+  loading.value = true;
+  loadError.value = null;
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const resp = await fetch('/api/highscores', {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      credentials: 'include',
+      signal: controller.signal
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    highscores.value = (Array.isArray(data) ? data : [])
+        .map(h => ({
+          name: h.id ?? h.userName ?? h.playerName ?? 'Unbekannt',
+          score: h.score ?? 0
+        }));
+  } catch (e) {
+    loadError.value = e.message;
+    highscores.value = [];
+  } finally {
+    clearTimeout(timeout);
+    loading.value = false;
+  }
+}
+onMounted(async () => {
+  await Promise.all([fetchHighscores()]);
+});
 
 function goBackToLobby() {
   emit('show-lobby');

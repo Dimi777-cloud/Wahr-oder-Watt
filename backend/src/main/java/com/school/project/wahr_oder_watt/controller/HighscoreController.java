@@ -23,7 +23,7 @@ public class HighscoreController {
    */
   @GetMapping
   public ResponseEntity<List<Highscore>> getAllHighscores() {
-    return ResponseEntity.ok(highscoreService.findAll());
+    return ResponseEntity.ok(highscoreService.findAllSortedByScoreDesc());
   }
 
   /**

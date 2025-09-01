@@ -24,6 +24,14 @@ public class HighscoreService {
   public List<Highscore> findAll() {
     return highscoreRepository.findAll();
   }
+  /**
+   * Gibt alle Highscores sortiert nach Punktzahl in absteigender Reihenfolge zurück.
+   *
+   * @return Liste aller Highscores, sortiert nach Punktzahl (absteigend).
+   */
+  public List<Highscore> findAllSortedByScoreDesc() {
+    return highscoreRepository.findAllByOrderByScoreDesc();
+  }
 
   /**
    * Sucht einen Highscore anhand der ID.
